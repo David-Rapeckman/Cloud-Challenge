@@ -1,22 +1,34 @@
-Projeto SysTrack -  1º Semestre - 2TDS
+# Projeto SysTrack - 1º Semestre - 2TDS
 
 Passo a passo para provisionar a infraestrutura em nuvem utilizando Azure CLI, implantar uma aplicação Java com Docker, e expor o serviço ao público utilizando uma máquina virtual no Azure.
-Índice
 
-Criação do Grupo de Recursos
-Criação da Máquina Virtual
-Criação das Regras NSG (Segurança)
-Instalação do Docker na VM
-Dockerfile da Aplicação
-Build da Imagem Docker
-Publicação no Docker Hub
-Execução da Imagem na VM
-Acesso à Aplicação
-1. Criação do Grupo de Recursos
+---
 
+## Índice
+
+1. Criação do Grupo de Recursos  
+2. Criação da Máquina Virtual  
+3. Criação das Regras NSG (Segurança)  
+4. Instalação do Docker na VM  
+5. Dockerfile da Aplicação  
+6. Build da Imagem Docker  
+7. Publicação no Docker Hub  
+8. Execução da Imagem na VM  
+9. Acesso à Aplicação  
+
+---
+
+## 1. Criação do Grupo de Recursos
+
+```bash
 az group create -l brazilsouth -n rg-vm-challenge
-2. Criação da Máquina Virtual
+```
 
+---
+
+## 2. Criação da Máquina Virtual
+
+```bash
 az vm create \
   --resource-group rg-vm-challenge \
   --name vm-challenge \
@@ -25,9 +37,15 @@ az vm create \
   --admin-username admin_fiap \
   --admin-password Admin_Fiap@123 \
   --authentication-type password
-3. Criação das Regras NSG (Segurança)
+```
 
-Liberação da porta 8080
+---
+
+## 3. Criação das Regras NSG (Segurança)
+
+### Liberação da porta 8080
+
+```bash
 az network nsg rule create \
   --resource-group rg-vm-challenge \
   --nsg-name vm-challengeNSG \
@@ -39,7 +57,11 @@ az network nsg rule create \
   --destination-port-ranges 8080 \
   --source-address-prefixes 0.0.0.0/0 \
   --destination-address-prefixes 0.0.0.0/0
-Liberação da porta 80 (HTTP)
+```
+
+### Liberação da porta 80 (HTTP)
+
+```bash
 az network nsg rule create \
   --resource-group rg-vm-challenge \
   --nsg-name vm-challengeNSG \
@@ -51,8 +73,13 @@ az network nsg rule create \
   --destination-port-ranges 80 \
   --source-address-prefixes 0.0.0.0/0 \
   --destination-address-prefixes 0.0.0.0/0
-4. Instalação do Docker na VM
+```
 
+---
+
+## 4. Instalação do Docker na VM
+
+```bash
 sudo apt-get update
 sudo apt-get install ca-certificates curl
 sudo install -m 0755 -d /etc/apt/keyrings
@@ -66,8 +93,13 @@ echo \
 
 sudo apt-get update
 sudo apt-get install docker-ce docker-ce-cli containerd.io docker-compose-plugin
-5. Dockerfile da Aplicação
+```
 
+---
+
+## 5. Dockerfile da Aplicação
+
+```dockerfile
 FROM eclipse-temurin:17-jre-alpine
 
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
@@ -83,23 +115,58 @@ USER appuser
 EXPOSE 8080
 
 CMD ["java", "-jar", "app.jar"]
-6. Build da Imagem Docker
+```
 
+---
+
+## 6. Build da Imagem Docker
+
+```bash
 sudo docker build -t systrack-api:1.0 .
-7. Publicação no Docker Hub
+```
 
-Tag da Imagem
+---
+
+## 7. Publicação no Docker Hub
+
+### Tag da Imagem
+
+```bash
 sudo docker tag systrack-api:1.0 davidrapeckman/systrack-api:1.0
-Login no Docker Hub
-sudo docker login
-Push da Imagem
-sudo docker push davidrapeckman/systrack-api:1.0
-8. Execução da Imagem na VM
+```
 
+### Login no Docker Hub
+
+```bash
+sudo docker login
+```
+
+### Push da Imagem
+
+```bash
+sudo docker push davidrapeckman/systrack-api:1.0
+```
+
+---
+
+## 8. Execução da Imagem na VM
+
+```bash
 sudo docker run -d -p 8080:8080 davidrapeckman/systrack-api:1.0
-9. Acesso à Aplicação
+```
+
+---
+
+## 9. Acesso à Aplicação
 
 Acesse a aplicação via navegador pelo IP público da VM:
+
+```
 http://<IP_DA_VM>:8080
+```
+
 Exemplo:
+
+```
 http://4.201.131.155:8080
+```
